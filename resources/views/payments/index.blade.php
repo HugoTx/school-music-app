@@ -19,21 +19,29 @@
         </div>
 
         @if(!$payment->paid)
-        <form method="POST" action="{{ route('payments.paid', $payment) }}">
+        <form method="POST" action="{{ route('payments.paid', $payment->id) }}" style="display:inline;">
             @csrf
             @method('PATCH')
+
             <button type="submit" style="
-    background:#16a34a;
-    color:white;
-    padding:6px 12px;
-    border-radius:6px;
-    margin-left:10px;
-">
+        background:#16a34a;
+        color:white;
+        padding:6px 12px;
+        border-radius:6px;
+        margin-left:10px;
+        border:none;
+        cursor:pointer;
+        font-weight:bold;
+    ">
                 Marcar como pago
             </button>
-
         </form>
+        @else
+        <span style="color:#16a34a; font-weight:bold;">
+            Pago em {{ $payment->paid_at }}
+        </span>
         @endif
+
     </li>
 
     @endforeach
