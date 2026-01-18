@@ -33,4 +33,12 @@ class StudentController extends Controller
         return redirect()->route('students.index')
             ->with('success', 'Aluno criado com sucesso.');
     }
+    public function byStudent($id)
+    {
+        $student = Student::with([
+            'payments.enrollment.lesson'
+        ])->findOrFail($id);
+
+        return view('students.payments', compact('student'));
+    }
 }

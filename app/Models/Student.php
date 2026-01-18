@@ -18,4 +18,12 @@ class Student extends Model
     {
         return $this->hasMany(Enrollment::class);
     }
+
+    public function payments()
+    {
+        return $this->hasManyThrough(
+            Payment::class,
+            Enrollment::class
+        );
+    }
 }
