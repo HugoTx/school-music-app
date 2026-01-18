@@ -9,9 +9,17 @@
 
 <ul class="mt-4">
     @foreach($students as $student)
-    <li class="p-2 bg-white shadow mb-2">
-        {{ $student->name }}
+    <li class="p-2 bg-white shadow mb-2 flex justify-between items-center">
+        <span>{{ $student->name }}</span>
+
+        <a href="{{ route('students.payments', $student) }}"
+            class="text-green-700 underline font-semibold">
+            Ver pagamentos →
+        </a>
+
+
     </li>
+
     @endforeach
 </ul>
 @endsection
