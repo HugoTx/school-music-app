@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\Enrollment;
 use Illuminate\Http\Request;
-use App\Models\Student;
 
 class PaymentController extends Controller
 {
@@ -30,7 +29,12 @@ class PaymentController extends Controller
             'amount' => 'required|numeric',
         ]);
 
-        Payment::create($request->all());
+        Payment::create($request->only([
+            'enrollment_id',
+            'month',
+            'year',
+            'amount',
+        ]));
 
         return redirect()->route('payments.index');
     }
@@ -44,20 +48,5 @@ class PaymentController extends Controller
 
         return redirect()->route('payments.index')
             ->with('success', 'Payment marked as paid.');
-    }
-
-    public function byStudent(Student $student)
-    {
-        $payments = $student->payments()->with('enrollment')->get();
-
-        $totalPaid = $payments->where('paid', true)->sum('amount');
-        $totalDue  = $payments->where('paid', false)->sum('amount');
-
-        return view('payments.by-student', compact(
-            'student',
-            'payments',
-            'totalPaid',
-            'totalDue'
-        ));
     }
 }
