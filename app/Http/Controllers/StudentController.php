@@ -10,6 +10,7 @@ class StudentController extends Controller
     public function index()
     {
         $students = Student::latest()->get();
+
         return view('students.index', compact('students'));
     }
 
@@ -21,21 +22,35 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|string|max:255',
             'birth_date' => 'nullable|date',
-            'email' => 'nullable|email',
-            'phone' => 'nullable',
-            'notes' => 'nullable',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:50',
+            'notes' => 'nullable|string',
         ]);
 
-        Student::create($request->all());
+        Student::create($request->only([
+            'name',
+            'birth_date',
+            'email',
+            'phone',
+            'notes',
+        ]));
 
-        return redirect()->route('students.index')
+        return redirect()
+            ->route('students.index')
             ->with('success', 'Aluno criado com sucesso.');
     }
+
     public function byStudent(Student $student)
     {
-        $student->load('payments.enrollment.lesson');
+        $student->load([
+            'payments' => function ($query) {
+                $query->with('enrollment.lesson')
+                    ->orderBy('year', 'desc')
+                    ->orderBy('month', 'desc');
+            }
+        ]);
 
         return view('students.payments', compact('student'));
     }

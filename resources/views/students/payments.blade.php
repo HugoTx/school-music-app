@@ -6,9 +6,23 @@
     Pagamentos do aluno: {{ $student->name }}
 </h1>
 
-<a href="{{ route('students.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded">
-    ← Voltar
-</a>
+@if(session('success'))
+<div style="background: #d1fae5; color: #065f46; padding: 10px; border-radius: 6px; margin-bottom: 16px;">
+    {{ session('success') }}
+</div>
+@endif
+
+<div class="mb-4">
+    <a href="{{ route('students.index') }}"
+        class="inline-block bg-gray-500 text-white px-4 py-2 rounded">
+        ← Voltar
+    </a>
+
+    <a href="{{ route('students.payments.create', $student->id) }}"
+        style="background: #2563eb; color: white; padding: 8px 12px; border-radius: 6px; margin-left: 8px;">
+        + Adicionar pagamento
+    </a>
+</div>
 
 <table class="w-full mt-4 bg-white shadow rounded">
     <thead>
@@ -23,7 +37,7 @@
     </thead>
 
     <tbody>
-        @foreach($student->payments as $payment)
+        @forelse($student->payments as $payment)
         <tr class="border-b">
             <td class="p-2">
                 {{ $payment->enrollment->lesson->name ?? '—' }}
@@ -55,15 +69,22 @@
                     @csrf
                     @method('PATCH')
 
-                    <button type="submit"
-                        class="bg-green-600 text-white px-3 py-1 rounded">
+                    <button type="submit" style="background: green; color: white; padding: 6px 12px; border-radius: 6px;">
                         Marcar como pago
                     </button>
                 </form>
+                @else
+                <span style="color: #6b7280;">—</span>
                 @endif
             </td>
         </tr>
-        @endforeach
+        @empty
+        <tr>
+            <td colspan="6" class="p-4 text-center text-gray-500">
+                Ainda não existem pagamentos para este aluno.
+            </td>
+        </tr>
+        @endforelse
     </tbody>
 </table>
 

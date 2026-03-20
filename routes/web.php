@@ -48,6 +48,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/students/{student}/payments', [StudentController::class, 'byStudent'])
         ->name('students.payments');
+
+    Route::get('/students/{student}/payments/create', [PaymentController::class, 'createByStudent'])
+        ->name('students.payments.create');
+
+    Route::post('/students/{student}/payments', [PaymentController::class, 'storeByStudent'])
+        ->name('students.payments.store');
 });
 
 
