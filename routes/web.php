@@ -45,6 +45,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::patch('/payments/{payment}/paid', [PaymentController::class, 'markAsPaid'])
         ->name('payments.paid');
+
+    Route::get('/students/{student}/payments', [StudentController::class, 'byStudent'])
+        ->name('students.payments');
 });
 
 

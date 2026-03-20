@@ -16,6 +16,11 @@ class Payment extends Model
         'paid',
         'paid_at',
     ];
+    protected $casts = [
+        'paid_at' => 'datetime',
+        'paid' => 'boolean',
+    ];
+
     public function enrollment()
     {
         return $this->belongsTo(Enrollment::class);

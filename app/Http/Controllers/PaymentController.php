@@ -29,7 +29,12 @@ class PaymentController extends Controller
             'amount' => 'required|numeric',
         ]);
 
-        Payment::create($request->all());
+        Payment::create($request->only([
+            'enrollment_id',
+            'month',
+            'year',
+            'amount',
+        ]));
 
         return redirect()->route('payments.index');
     }
@@ -41,6 +46,7 @@ class PaymentController extends Controller
             'paid_at' => now(),
         ]);
 
-        return redirect()->route('payments.index');
+        return redirect()->route('payments.index')
+            ->with('success', 'Payment marked as paid.');
     }
 }
