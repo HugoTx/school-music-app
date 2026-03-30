@@ -32,6 +32,20 @@ class PaymentController extends Controller
             'amount' => 'required|numeric|min:0',
         ]);
 
+        $exists = Payment::where('enrollment_id', $request->enrollment_id)
+            ->where('month', $request->month)
+            ->where('year', $request->year)
+            ->exists();
+
+        if ($exists) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'duplicate' => 'Já existe um pagamento para esta inscrição neste mês e ano.',
+                ]);
+        }
+
         Payment::create($request->only([
             'enrollment_id',
             'month',
@@ -75,6 +89,20 @@ class PaymentController extends Controller
         $enrollment = $student->enrollments()
             ->where('id', $request->enrollment_id)
             ->firstOrFail();
+
+        $exists = Payment::where('enrollment_id', $enrollment->id)
+            ->where('month', $request->month)
+            ->where('year', $request->year)
+            ->exists();
+
+        if ($exists) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'duplicate' => 'Já existe um pagamento para esta inscrição neste mês e ano.',
+                ]);
+        }
 
         Payment::create([
             'enrollment_id' => $enrollment->id,
