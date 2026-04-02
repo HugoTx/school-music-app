@@ -64,12 +64,18 @@ class StudentController extends Controller
 
         $paymentsCount = $student->payments->count();
 
+        $hasPendingPayments = $student->payments
+            ->contains(fn($p) => !$p->paid);
+
+        $financialStatus = $hasPendingPayments ? 'Em dívida' : 'Em dia';
+
         return view('students.payments', compact(
             'student',
             'totalPaid',
             'totalPending',
             'totalAmount',
-            'paymentsCount'
+            'paymentsCount',
+            'financialStatus'
         ));
     }
 }

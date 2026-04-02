@@ -6,6 +6,18 @@
     Pagamentos do aluno: {{ $student->name }}
 </h1>
 
+<div class="mb-4">
+    @if($financialStatus === 'Em dívida')
+    <span style="background: #fee2e2; color: #991b1b; padding: 8px 12px; border-radius: 9999px; font-weight: bold;">
+        🔴 {{ $financialStatus }}
+    </span>
+    @else
+    <span style="background: #dcfce7; color: #166534; padding: 8px 12px; border-radius: 9999px; font-weight: bold;">
+        🟢 {{ $financialStatus }}
+    </span>
+    @endif
+</div>
+
 @if(session('success'))
 <div style="background: #d1fae5; color: #065f46; padding: 10px; border-radius: 6px; margin-bottom: 16px;">
     {{ session('success') }}
