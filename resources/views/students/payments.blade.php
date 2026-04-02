@@ -94,8 +94,13 @@
             </td>
 
             <td class="p-2">
+                <a href="{{ route('students.payments.edit', [$student->id, $payment->id]) }}"
+                    style="background: #2563eb; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: inline-block; margin-right: 8px;">
+                    Editar
+                </a>
+
                 @if(!$payment->paid)
-                <form method="POST" action="{{ route('payments.paid', $payment) }}">
+                <form method="POST" action="{{ route('payments.paid', $payment) }}" style="display: inline-block;">
                     @csrf
                     @method('PATCH')
 
@@ -103,8 +108,6 @@
                         Marcar como pago
                     </button>
                 </form>
-                @else
-                <span style="color: #6b7280;">—</span>
                 @endif
             </td>
         </tr>
