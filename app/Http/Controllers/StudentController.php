@@ -52,6 +52,24 @@ class StudentController extends Controller
             }
         ]);
 
-        return view('students.payments', compact('student'));
+        $totalPaid = $student->payments
+            ->filter(fn($p) => $p->paid)
+            ->sum('amount');
+
+        $totalPending = $student->payments
+            ->filter(fn($p) => !$p->paid)
+            ->sum('amount');
+
+        $totalAmount = $student->payments->sum('amount');
+
+        $paymentsCount = $student->payments->count();
+
+        return view('students.payments', compact(
+            'student',
+            'totalPaid',
+            'totalPending',
+            'totalAmount',
+            'paymentsCount'
+        ));
     }
 }

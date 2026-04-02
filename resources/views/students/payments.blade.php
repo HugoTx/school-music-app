@@ -12,6 +12,36 @@
 </div>
 @endif
 
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div style="background: #ecfdf5; padding: 16px; border-radius: 8px;">
+        <p style="color: #065f46; font-size: 14px;">Total pago</p>
+        <h2 style="font-size: 24px; font-weight: bold; color: #065f46;">
+            €{{ number_format($totalPaid, 2, ',', '.') }}
+        </h2>
+    </div>
+
+    <div style="background: #fef2f2; padding: 16px; border-radius: 8px;">
+        <p style="color: #991b1b; font-size: 14px;">Total por pagar</p>
+        <h2 style="font-size: 24px; font-weight: bold; color: #991b1b;">
+            €{{ number_format($totalPending, 2, ',', '.') }}
+        </h2>
+    </div>
+
+    <div style="background: #eff6ff; padding: 16px; border-radius: 8px;">
+        <p style="color: #1d4ed8; font-size: 14px;">Total geral</p>
+        <h2 style="font-size: 24px; font-weight: bold; color: #1d4ed8;">
+            €{{ number_format($totalAmount, 2, ',', '.') }}
+        </h2>
+    </div>
+
+    <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
+        <p style="color: #374151; font-size: 14px;">Nº de pagamentos</p>
+        <h2 style="font-size: 24px; font-weight: bold; color: #111827;">
+            {{ $paymentsCount }}
+        </h2>
+    </div>
+</div>
+
 <div class="mb-4">
     <a href="{{ route('students.index') }}"
         class="inline-block bg-gray-500 text-white px-4 py-2 rounded">
