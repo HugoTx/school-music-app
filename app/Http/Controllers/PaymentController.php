@@ -116,4 +116,58 @@ class PaymentController extends Controller
             ->route('students.payments', $student)
             ->with('success', 'Pagamento criado com sucesso.');
     }
+    public function editByStudent(Student $student, Payment $payment)
+    {
+        $student->enrollments()
+            ->where('id', $payment->enrollment_id)
+            ->firstOrFail();
+
+        $enrollments = $student->enrollments()->with('lesson')->get();
+
+        return view('payments.edit-by-student', compact(
+            'student',
+            'payment',
+            'enrollments'
+        ));
+    }
+
+    public function updateByStudent(Request $request, Student $student, Payment $payment)
+    {
+        $request->validate([
+            'enrollment_id' => 'required|exists:enrollments,id',
+            'month' => 'required|integer|min:1|max:12',
+            'year' => 'required|integer|min:2000|max:2100',
+            'amount' => 'required|numeric|min:0',
+        ]);
+
+        $enrollment = $student->enrollments()
+            ->where('id', $request->enrollment_id)
+            ->firstOrFail();
+
+        $exists = Payment::where('enrollment_id', $enrollment->id)
+            ->where('month', $request->month)
+            ->where('year', $request->year)
+            ->where('id', '!=', $payment->id)
+            ->exists();
+
+        if ($exists) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'duplicate' => 'Já existe um pagamento para esta inscrição neste mês e ano.',
+                ]);
+        }
+
+        $payment->update([
+            'enrollment_id' => $enrollment->id,
+            'month' => $request->month,
+            'year' => $request->year,
+            'amount' => $request->amount,
+        ]);
+
+        return redirect()
+            ->route('students.payments', $student)
+            ->with('success', 'Pagamento atualizado com sucesso.');
+    }
 }
