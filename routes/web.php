@@ -41,25 +41,17 @@ Route::middleware(['auth'])->group(function () {
             ->orderBy('month', 'desc')
             ->get();
 
-        $totalPaid = $payments
-            ->filter(fn($payment) => $payment->paid)
-            ->sum('amount');
+        $totalPaid = \App\Models\Payment::where('paid', true)->sum('amount');
+        $totalPending = \App\Models\Payment::where('paid', false)->sum('amount');
+        $totalAmount = \App\Models\Payment::sum('amount');
 
-        $totalPending = $payments
-            ->filter(fn($payment) => !$payment->paid)
-            ->sum('amount');
+        $paymentsCount = \App\Models\Payment::count();
+        $paidCount = \App\Models\Payment::where('paid', true)->count();
+        $pendingCount = \App\Models\Payment::where('paid', false)->count();
 
-        $totalAmount = $payments->sum('amount');
-
-        $paymentsCount = $payments->count();
-
-        $paidCount = $payments
-            ->filter(fn($payment) => $payment->paid)
-            ->count();
-
-        $pendingCount = $payments
-            ->filter(fn($payment) => !$payment->paid)
-            ->count();
+        $collectionRate = $totalAmount > 0
+            ? round(($totalPaid / $totalAmount) * 100)
+            : 0;
 
         return view('reports.finance', compact(
             'payments',
@@ -68,7 +60,8 @@ Route::middleware(['auth'])->group(function () {
             'totalAmount',
             'paymentsCount',
             'paidCount',
-            'pendingCount'
+            'pendingCount',
+            'collectionRate'
         ));
     })->name('reports.finance');
 

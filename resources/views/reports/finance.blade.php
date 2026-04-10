@@ -4,7 +4,7 @@
 <div class="container">
     <h1 class="text-2xl font-bold mb-4">Dashboard Financeiro</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div style="background: #ecfdf5; padding: 16px; border-radius: 8px;">
             <p style="color: #065f46; font-size: 14px;">Total recebido</p>
             <h2 style="font-size: 24px; font-weight: bold; color: #065f46;">
@@ -25,9 +25,14 @@
                 €{{ number_format($totalAmount, 2, ',', '.') }}
             </h2>
         </div>
-    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div style="background: #fefce8; padding: 16px; border-radius: 8px;">
+            <p style="color: #854d0e; font-size: 14px;">Taxa de cobrança</p>
+            <h2 style="font-size: 24px; font-weight: bold; color: #854d0e;">
+                {{ $collectionRate }}%
+            </h2>
+        </div>
+
         <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
             <p style="color: #374151; font-size: 14px;">Nº total de pagamentos</p>
             <h2 style="font-size: 24px; font-weight: bold; color: #111827;">
