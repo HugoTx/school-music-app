@@ -1,12 +1,12 @@
 <?php
 
+use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\LessonController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
-use App\Http\Controllers\LessonController;
-use App\Http\Controllers\EnrollmentController;
-use App\Http\Controllers\PaymentController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
@@ -23,35 +23,82 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
     Route::resource('students', StudentController::class);
     Route::resource('teachers', TeacherController::class);
     Route::resource('lessons', LessonController::class);
     Route::resource('enrollments', EnrollmentController::class);
     Route::resource('payments', PaymentController::class);
 
+    Route::get('/reports/finance', function (\Illuminate\Http\Request $request) {
+        $selectedYear = $request->query('year');
 
-    Route::get('/reports/finance', function () {
-        $payments = \App\Models\Payment::with('enrollment.student', 'enrollment.lesson')
+        $paymentsQuery = \App\Models\Payment::with('enrollment.student', 'enrollment.lesson');
+
+        if ($selectedYear) {
+            $paymentsQuery->where('year', $selectedYear);
+        }
+
+        $payments = (clone $paymentsQuery)
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
             ->get();
 
-        $totalPaid = \App\Models\Payment::where('paid', true)->sum('amount');
-        $totalPending = \App\Models\Payment::where('paid', false)->sum('amount');
-        $totalAmount = \App\Models\Payment::sum('amount');
+        $totalsQuery = \App\Models\Payment::query();
 
-        $paymentsCount = \App\Models\Payment::count();
-        $paidCount = \App\Models\Payment::where('paid', true)->count();
-        $pendingCount = \App\Models\Payment::where('paid', false)->count();
+        if ($selectedYear) {
+            $totalsQuery->where('year', $selectedYear);
+        }
+
+        $totalPaid = (clone $totalsQuery)->where('paid', true)->sum('amount');
+        $totalPending = (clone $totalsQuery)->where('paid', false)->sum('amount');
+        $totalAmount = (clone $totalsQuery)->sum('amount');
+
+        $paymentsCount = (clone $totalsQuery)->count();
+        $paidCount = (clone $totalsQuery)->where('paid', true)->count();
+        $pendingCount = (clone $totalsQuery)->where('paid', false)->count();
 
         $collectionRate = $totalAmount > 0
             ? round(($totalPaid / $totalAmount) * 100)
             : 0;
+
+        $paymentsByMonthQuery = \App\Models\Payment::selectRaw('year, month, paid, SUM(amount) as total');
+
+        if ($selectedYear) {
+            $paymentsByMonthQuery->where('year', $selectedYear);
+        }
+
+        $paymentsByMonth = $paymentsByMonthQuery
+            ->groupBy('year', 'month', 'paid')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        $grouped = $paymentsByMonth
+            ->groupBy(fn($item) => $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT))
+            ->sortKeys();
+
+        $labels = [];
+        $paidData = [];
+        $pendingData = [];
+
+        foreach ($grouped as $key => $items) {
+            [$year, $month] = explode('-', $key);
+
+            $labels[] = $month . '/' . $year;
+
+            $paidData[] = $items
+                ->where('paid', true)
+                ->sum('total');
+
+            $pendingData[] = $items
+                ->where('paid', false)
+                ->sum('total');
+        }
+
+        $availableYears = \App\Models\Payment::select('year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
 
         return view('reports.finance', compact(
             'payments',
@@ -61,7 +108,12 @@ Route::middleware(['auth'])->group(function () {
             'paymentsCount',
             'paidCount',
             'pendingCount',
-            'collectionRate'
+            'collectionRate',
+            'labels',
+            'paidData',
+            'pendingData',
+            'availableYears',
+            'selectedYear'
         ));
     })->name('reports.finance');
 
@@ -86,6 +138,5 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/students/{student}/payments/{payment}', [PaymentController::class, 'destroyByStudent'])
         ->name('students.payments.destroy');
 });
-
 
 require __DIR__ . '/auth.php';
