@@ -16,9 +16,9 @@
             <nav class="p-4 space-y-2">
                 <a href="/dashboard" class="block">Dashboard</a>
                 <a href="/students" class="block">Alunos</a>
-                <a href="#" class="block">Professores</a>
-                <a href="#" class="block">Aulas</a>
-                <a href="#" class="block">Pagamentos</a>
+                <a href="/teachers" class="block">Professores</a>
+                <a href="/lessons" class="block">Aulas</a>
+                <a href="/payments" class="block">Pagamentos</a>
             </nav>
         </aside>
 
