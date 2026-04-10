@@ -19,6 +19,7 @@
                 <a href="/teachers" class="block">Professores</a>
                 <a href="/lessons" class="block">Aulas</a>
                 <a href="/payments" class="block">Pagamentos</a>
+                <a href="/reports/finance" class="block">Relatório financeiro</a>
             </nav>
         </aside>
 

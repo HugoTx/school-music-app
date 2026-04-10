@@ -36,11 +36,40 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::get('/reports/finance', function () {
-        $payments = \App\Models\Payment::where('paid', true)->get();
+        $payments = \App\Models\Payment::with('enrollment.student', 'enrollment.lesson')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get();
 
-        $total = $payments->sum('amount');
+        $totalPaid = $payments
+            ->filter(fn($payment) => $payment->paid)
+            ->sum('amount');
 
-        return view('reports.finance', compact('payments', 'total'));
+        $totalPending = $payments
+            ->filter(fn($payment) => !$payment->paid)
+            ->sum('amount');
+
+        $totalAmount = $payments->sum('amount');
+
+        $paymentsCount = $payments->count();
+
+        $paidCount = $payments
+            ->filter(fn($payment) => $payment->paid)
+            ->count();
+
+        $pendingCount = $payments
+            ->filter(fn($payment) => !$payment->paid)
+            ->count();
+
+        return view('reports.finance', compact(
+            'payments',
+            'totalPaid',
+            'totalPending',
+            'totalAmount',
+            'paymentsCount',
+            'paidCount',
+            'pendingCount'
+        ));
     })->name('reports.finance');
 
     Route::patch('/payments/{payment}/paid', [PaymentController::class, 'markAsPaid'])
