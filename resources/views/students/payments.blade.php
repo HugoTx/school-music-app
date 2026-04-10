@@ -117,7 +117,7 @@
                     @method('PATCH')
 
                     <button type="submit" style="background: green; color: white; padding: 6px 12px; border-radius: 6px;">
-                        Pago
+                        Marcar como Pago
                     </button>
                 </form>
                 @endif
