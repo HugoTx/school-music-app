@@ -117,10 +117,23 @@
                     @method('PATCH')
 
                     <button type="submit" style="background: green; color: white; padding: 6px 12px; border-radius: 6px;">
-                        Marcar como pago
+                        Pago
                     </button>
                 </form>
                 @endif
+
+                <form method="POST"
+                    action="{{ route('students.payments.destroy', [$student->id, $payment->id]) }}"
+                    style="display: inline-block;"
+                    onsubmit="return confirm('Tens a certeza que queres apagar este pagamento?')">
+                    @csrf
+                    @method('DELETE')
+
+                    <button type="submit"
+                        style="background: #dc2626; color: white; padding: 6px 12px; border-radius: 6px; margin-left: 8px;">
+                        Apagar
+                    </button>
+                </form>
             </td>
         </tr>
         @empty

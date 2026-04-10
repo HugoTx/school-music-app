@@ -170,4 +170,17 @@ class PaymentController extends Controller
             ->route('students.payments', $student)
             ->with('success', 'Pagamento atualizado com sucesso.');
     }
+
+    public function destroyByStudent(Student $student, Payment $payment)
+    {
+        $student->enrollments()
+            ->where('id', $payment->enrollment_id)
+            ->firstOrFail();
+
+        $payment->delete();
+
+        return redirect()
+            ->route('students.payments', $student)
+            ->with('success', 'Pagamento eliminado com sucesso.');
+    }
 }

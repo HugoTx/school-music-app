@@ -60,6 +60,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::put('/students/{student}/payments/{payment}', [PaymentController::class, 'updateByStudent'])
         ->name('students.payments.update');
+
+    Route::delete('/students/{student}/payments/{payment}', [PaymentController::class, 'destroyByStudent'])
+        ->name('students.payments.destroy');
 });
 
 
