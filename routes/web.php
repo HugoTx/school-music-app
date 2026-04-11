@@ -1,12 +1,12 @@
 <?php
 
+use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\LessonController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
-use App\Http\Controllers\LessonController;
-use App\Http\Controllers\EnrollmentController;
-use App\Http\Controllers\PaymentController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
@@ -23,17 +23,11 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
     Route::resource('students', StudentController::class);
     Route::resource('teachers', TeacherController::class);
     Route::resource('lessons', LessonController::class);
     Route::resource('enrollments', EnrollmentController::class);
     Route::resource('payments', PaymentController::class);
-
 
     Route::get('/reports/finance', function (\Illuminate\Http\Request $request) {
         $selectedYear = $request->query('year');
@@ -164,6 +158,5 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/students/{student}/payments/{payment}', [PaymentController::class, 'destroyByStudent'])
         ->name('students.payments.destroy');
 });
-
 
 require __DIR__ . '/auth.php';
