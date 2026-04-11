@@ -35,23 +35,95 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('payments', PaymentController::class);
 
 
-    Route::get('/reports/finance', function () {
-        $payments = \App\Models\Payment::with('enrollment.student', 'enrollment.lesson')
+    Route::get('/reports/finance', function (\Illuminate\Http\Request $request) {
+        $selectedYear = $request->query('year');
+
+        $paymentsQuery = \App\Models\Payment::with('enrollment.student', 'enrollment.lesson');
+
+        if ($selectedYear) {
+            $paymentsQuery->where('year', $selectedYear);
+        }
+
+        $payments = (clone $paymentsQuery)
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
             ->get();
 
-        $totalPaid = \App\Models\Payment::where('paid', true)->sum('amount');
-        $totalPending = \App\Models\Payment::where('paid', false)->sum('amount');
-        $totalAmount = \App\Models\Payment::sum('amount');
+        $totalsQuery = \App\Models\Payment::query();
 
-        $paymentsCount = \App\Models\Payment::count();
-        $paidCount = \App\Models\Payment::where('paid', true)->count();
-        $pendingCount = \App\Models\Payment::where('paid', false)->count();
+        if ($selectedYear) {
+            $totalsQuery->where('year', $selectedYear);
+        }
+
+        $totalPaid = (clone $totalsQuery)->where('paid', true)->sum('amount');
+        $totalPending = (clone $totalsQuery)->where('paid', false)->sum('amount');
+        $totalAmount = (clone $totalsQuery)->sum('amount');
+
+        $paymentsCount = (clone $totalsQuery)->count();
+        $paidCount = (clone $totalsQuery)->where('paid', true)->count();
+        $pendingCount = (clone $totalsQuery)->where('paid', false)->count();
 
         $collectionRate = $totalAmount > 0
             ? round(($totalPaid / $totalAmount) * 100)
             : 0;
+
+        $paymentsByMonthQuery = \App\Models\Payment::selectRaw('year, month, paid, SUM(amount) as total');
+
+        if ($selectedYear) {
+            $paymentsByMonthQuery->where('year', $selectedYear);
+        }
+
+        $paymentsByMonth = $paymentsByMonthQuery
+            ->groupBy('year', 'month', 'paid')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        $grouped = $paymentsByMonth
+            ->groupBy(fn($item) => $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT))
+            ->sortKeys();
+
+        $labels = [];
+        $paidData = [];
+        $pendingData = [];
+
+        foreach ($grouped as $key => $items) {
+            [$year, $month] = explode('-', $key);
+
+            $labels[] = $month . '/' . $year;
+
+            $paidData[] = $items->where('paid', true)->sum('total');
+            $pendingData[] = $items->where('paid', false)->sum('total');
+        }
+
+        $topDebtorsQuery = \App\Models\Payment::with('enrollment.student')
+            ->where('paid', false);
+
+        if ($selectedYear) {
+            $topDebtorsQuery->where('year', $selectedYear);
+        }
+
+        $topDebtors = $topDebtorsQuery
+            ->get()
+            ->groupBy(fn($payment) => $payment->enrollment->student->id)
+            ->map(function ($payments) {
+                $student = $payments->first()->enrollment->student;
+
+                return [
+                    'student_id' => $student->id,
+                    'student_name' => $student->name,
+                    'total_pending' => $payments->sum('amount'),
+                    'pending_count' => $payments->count(),
+                ];
+            })
+            ->sortByDesc('total_pending')
+            ->take(5)
+            ->values();
+
+        $availableYears = \App\Models\Payment::select('year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
 
         return view('reports.finance', compact(
             'payments',
@@ -61,7 +133,13 @@ Route::middleware(['auth'])->group(function () {
             'paymentsCount',
             'paidCount',
             'pendingCount',
-            'collectionRate'
+            'collectionRate',
+            'labels',
+            'paidData',
+            'pendingData',
+            'availableYears',
+            'selectedYear',
+            'topDebtors'
         ));
     })->name('reports.finance');
 
