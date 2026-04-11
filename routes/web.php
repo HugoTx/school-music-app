@@ -86,14 +86,33 @@ Route::middleware(['auth'])->group(function () {
 
             $labels[] = $month . '/' . $year;
 
-            $paidData[] = $items
-                ->where('paid', true)
-                ->sum('total');
-
-            $pendingData[] = $items
-                ->where('paid', false)
-                ->sum('total');
+            $paidData[] = $items->where('paid', true)->sum('total');
+            $pendingData[] = $items->where('paid', false)->sum('total');
         }
+
+        $topDebtorsQuery = \App\Models\Payment::with('enrollment.student')
+            ->where('paid', false);
+
+        if ($selectedYear) {
+            $topDebtorsQuery->where('year', $selectedYear);
+        }
+
+        $topDebtors = $topDebtorsQuery
+            ->get()
+            ->groupBy(fn($payment) => $payment->enrollment->student->id)
+            ->map(function ($payments) {
+                $student = $payments->first()->enrollment->student;
+
+                return [
+                    'student_id' => $student->id,
+                    'student_name' => $student->name,
+                    'total_pending' => $payments->sum('amount'),
+                    'pending_count' => $payments->count(),
+                ];
+            })
+            ->sortByDesc('total_pending')
+            ->take(5)
+            ->values();
 
         $availableYears = \App\Models\Payment::select('year')
             ->distinct()
@@ -113,7 +132,8 @@ Route::middleware(['auth'])->group(function () {
             'paidData',
             'pendingData',
             'availableYears',
-            'selectedYear'
+            'selectedYear',
+            'topDebtors'
         ));
     })->name('reports.finance');
 
