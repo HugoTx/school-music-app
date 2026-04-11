@@ -55,6 +55,42 @@
         </div>
     </div>
 
+    <div class="bg-white shadow rounded p-4 mb-6">
+        <h2 class="text-xl font-bold mb-4">Top devedores</h2>
+
+        <div style="overflow-x: auto;">
+            <table class="w-full">
+                <thead>
+                    <tr style="background: #f3f4f6;">
+                        <th class="p-2 text-left">Aluno</th>
+                        <th class="p-2 text-left">Total em dívida</th>
+                        <th class="p-2 text-left">Pagamentos pendentes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($topDebtors as $debtor)
+                    <tr class="border-b">
+                        <td class="p-2">
+                            <a href="{{ route('students.payments', $debtor['student_id']) }}"
+                                class="text-blue-600 hover:underline font-semibold">
+                                {{ $debtor['student_name'] }}
+                            </a>
+                        </td>
+                        <td class="p-2">€{{ number_format($debtor['total_pending'], 2, ',', '.') }}</td>
+                        <td class="p-2">{{ $debtor['pending_count'] }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="3" class="p-4 text-center text-gray-500">
+                            Não existem alunos com pagamentos em dívida.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="bg-white shadow rounded p-4">
         <h2 class="text-xl font-bold mb-4">Lista de pagamentos</h2>
 
