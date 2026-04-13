@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
+
 <div class="container">
     <h1 class="text-2xl font-bold mb-4">
         Dashboard Financeiro
@@ -39,6 +40,7 @@
         </form>
     </div>
 
+    {{-- KPIs principais --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div style="background: #ecfdf5; padding: 16px; border-radius: 8px;">
             <p style="color: #065f46; font-size: 14px;">Total recebido</p>
@@ -69,6 +71,7 @@
         </div>
     </div>
 
+    {{-- Contadores --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
             <p style="color: #374151; font-size: 14px;">Nº total de pagamentos</p>
@@ -92,11 +95,55 @@
         </div>
     </div>
 
+    {{-- Aging da dívida --}}
+    <div class="mb-6">
+        <h2 class="text-xl font-bold mb-4">Antiguidade da dívida</h2>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <p class="text-sm text-gray-500">Não vencido</p>
+                <p class="mt-2 text-2xl font-semibold text-gray-900">
+                    € {{ number_format($debtAging['current'], 2, ',', '.') }}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-yellow-200 bg-yellow-50 p-4 shadow-sm">
+                <p class="text-sm text-yellow-700">1–30 dias</p>
+                <p class="mt-2 text-2xl font-semibold text-yellow-900">
+                    € {{ number_format($debtAging['1_30'], 2, ',', '.') }}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-orange-200 bg-orange-50 p-4 shadow-sm">
+                <p class="text-sm text-orange-700">31–60 dias</p>
+                <p class="mt-2 text-2xl font-semibold text-orange-900">
+                    € {{ number_format($debtAging['31_60'], 2, ',', '.') }}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
+                <p class="text-sm text-red-700">61–90 dias</p>
+                <p class="mt-2 text-2xl font-semibold text-red-900">
+                    € {{ number_format($debtAging['61_90'], 2, ',', '.') }}
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-red-300 bg-red-100 p-4 shadow-sm">
+                <p class="text-sm text-red-800">+90 dias</p>
+                <p class="mt-2 text-2xl font-semibold text-red-950">
+                    € {{ number_format($debtAging['90_plus'], 2, ',', '.') }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    {{-- Gráfico --}}
     <div class="bg-white shadow rounded p-4 mb-6">
         <h2 class="text-xl font-bold mb-4">Pagamentos por mês</h2>
         <canvas id="paymentsChart" height="100"></canvas>
     </div>
 
+    {{-- Tabela --}}
     <div class="bg-white shadow rounded p-4">
         <h2 class="text-xl font-bold mb-4">Lista de pagamentos</h2>
 
@@ -145,6 +192,8 @@
             </table>
         </div>
     </div>
+    ```
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -183,4 +232,5 @@
         }
     });
 </script>
+
 @endsection
