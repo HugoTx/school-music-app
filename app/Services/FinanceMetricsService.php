@@ -8,42 +8,79 @@ class FinanceMetricsService
 {
     public function getDashboardData(?int $selectedYear = null): array
     {
-        $paymentsQuery = Payment::with(['enrollment.student', 'enrollment.lesson']);
+        $totals = $this->getTotals($selectedYear);
+        $chartData = $this->getChartData($selectedYear);
+
+        return [
+            'payments' => $this->getPayments($selectedYear),
+            'totalPaid' => $totals['totalPaid'],
+            'totalPending' => $totals['totalPending'],
+            'totalAmount' => $totals['totalAmount'],
+            'paymentsCount' => $totals['paymentsCount'],
+            'paidCount' => $totals['paidCount'],
+            'pendingCount' => $totals['pendingCount'],
+            'collectionRate' => $totals['collectionRate'],
+            'labels' => $chartData['labels'],
+            'paidData' => $chartData['paidData'],
+            'pendingData' => $chartData['pendingData'],
+            'availableYears' => $this->getAvailableYears(),
+            'selectedYear' => $selectedYear,
+            'topDebtors' => $this->getTopDebtors($selectedYear),
+        ];
+    }
+
+    private function getPayments(?int $selectedYear = null)
+    {
+        $query = Payment::with(['enrollment.student', 'enrollment.lesson']);
 
         if ($selectedYear) {
-            $paymentsQuery->where('year', $selectedYear);
+            $query->where('year', $selectedYear);
         }
 
-        $payments = (clone $paymentsQuery)
+        return $query
             ->orderByDesc('year')
             ->orderByDesc('month')
             ->get();
+    }
 
-        $totalsQuery = Payment::query();
-
-        if ($selectedYear) {
-            $totalsQuery->where('year', $selectedYear);
-        }
-
-        $totalPaid = (clone $totalsQuery)->where('paid', true)->sum('amount');
-        $totalPending = (clone $totalsQuery)->where('paid', false)->sum('amount');
-        $totalAmount = (clone $totalsQuery)->sum('amount');
-
-        $paymentsCount = (clone $totalsQuery)->count();
-        $paidCount = (clone $totalsQuery)->where('paid', true)->count();
-        $pendingCount = (clone $totalsQuery)->where('paid', false)->count();
-
-        $collectionRate = $totalAmount > 0
-            ? round(($totalPaid / $totalAmount) * 100)
-            : 0;
-
-        $paymentsByMonthQuery = Payment::selectRaw('year, month, paid, SUM(amount) as total');
+    private function getTotals(?int $selectedYear = null): array
+    {
+        $query = Payment::query();
 
         if ($selectedYear) {
-            $paymentsByMonthQuery->where('year', $selectedYear);
+            $query->where('year', $selectedYear);
         }
 
-        $paymentsByMonth = $paymentsByMonthQuery
+        $totalPaid = (clone $query)->where('paid', true)->sum('amount');
+        $totalPending = (clone $query)->where('paid', false)->sum('amount');
+        $totalAmount = (clone $query)->sum('amount');
+
+        $paymentsCount = (clone $query)->count();
+        $paidCount = (clone $query)->where('paid', true)->count();
+        $pendingCount = (clone $query)->where('paid', false)->count();
+
+        return [
+            'totalPaid' => $totalPaid,
+            'totalPending' => $totalPending,
+            'totalAmount' => $totalAmount,
+            'paymentsCount' => $paymentsCount,
+            'paidCount' => $paidCount,
+            'pendingCount' => $pendingCount,
+            'collectionRate' => $totalAmount > 0
+                ? round(($totalPaid / $totalAmount) * 100)
+                : 0,
+        ];
+    }
+
+    private function getChartData(?int $selectedYear = null): array
+    {
+        $query = Payment::selectRaw('year, month, paid, SUM(amount) as total');
+
+        if ($selectedYear) {
+            $query->where('year', $selectedYear);
+        }
+
+        $paymentsByMonth = $query
             ->groupBy('year', 'month', 'paid')
             ->orderBy('year')
             ->orderBy('month')
@@ -65,14 +102,23 @@ class FinanceMetricsService
             $pendingData[] = $items->where('paid', false)->sum('total');
         }
 
-        $topDebtorsQuery = Payment::with('enrollment.student')
+        return [
+            'labels' => $labels,
+            'paidData' => $paidData,
+            'pendingData' => $pendingData,
+        ];
+    }
+
+    private function getTopDebtors(?int $selectedYear = null)
+    {
+        $query = Payment::with('enrollment.student')
             ->where('paid', false);
 
         if ($selectedYear) {
-            $topDebtorsQuery->where('year', $selectedYear);
+            $query->where('year', $selectedYear);
         }
 
-        $topDebtors = $topDebtorsQuery
+        return $query
             ->get()
             ->groupBy(fn($payment) => $payment->enrollment->student->id)
             ->map(function ($payments) {
@@ -88,27 +134,13 @@ class FinanceMetricsService
             ->sortByDesc('total_pending')
             ->take(5)
             ->values();
+    }
 
-        $availableYears = Payment::select('year')
+    private function getAvailableYears()
+    {
+        return Payment::select('year')
             ->distinct()
             ->orderByDesc('year')
             ->pluck('year');
-
-        return [
-            'payments' => $payments,
-            'totalPaid' => $totalPaid,
-            'totalPending' => $totalPending,
-            'totalAmount' => $totalAmount,
-            'paymentsCount' => $paymentsCount,
-            'paidCount' => $paidCount,
-            'pendingCount' => $pendingCount,
-            'collectionRate' => $collectionRate,
-            'labels' => $labels,
-            'paidData' => $paidData,
-            'pendingData' => $pendingData,
-            'availableYears' => $availableYears,
-            'selectedYear' => $selectedYear,
-            'topDebtors' => $topDebtors,
-        ];
     }
 }
