@@ -111,29 +111,26 @@ class FinanceMetricsService
 
     private function getTopDebtors(?int $selectedYear = null)
     {
-        $query = Payment::with('enrollment.student')
-            ->where('paid', false);
+        $query = Payment::query()
+            ->join('enrollments', 'payments.enrollment_id', '=', 'enrollments.id')
+            ->join('students', 'enrollments.student_id', '=', 'students.id')
+            ->where('payments.paid', false);
 
         if ($selectedYear) {
-            $query->where('year', $selectedYear);
+            $query->where('payments.year', $selectedYear);
         }
 
         return $query
-            ->get()
-            ->groupBy(fn($payment) => $payment->enrollment->student->id)
-            ->map(function ($payments) {
-                $student = $payments->first()->enrollment->student;
-
-                return [
-                    'student_id' => $student->id,
-                    'student_name' => $student->name,
-                    'total_pending' => $payments->sum('amount'),
-                    'pending_count' => $payments->count(),
-                ];
-            })
-            ->sortByDesc('total_pending')
-            ->take(5)
-            ->values();
+            ->selectRaw('
+            students.id as student_id,
+            students.name as student_name,
+            SUM(payments.amount) as total_pending,
+            COUNT(payments.id) as pending_count
+        ')
+            ->groupBy('students.id', 'students.name')
+            ->orderByDesc('total_pending')
+            ->limit(5)
+            ->get();
     }
 
     private function getAvailableYears()
