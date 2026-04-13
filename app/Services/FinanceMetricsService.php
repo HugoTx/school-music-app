@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Payment;
+use Carbon\Carbon;
 
 class FinanceMetricsService
 {
@@ -10,6 +11,7 @@ class FinanceMetricsService
     {
         $totals = $this->getTotals($selectedYear);
         $chartData = $this->getChartData($selectedYear);
+        $debtAging = $this->getDebtAging($selectedYear);
 
         return [
             'payments' => $this->getPayments($selectedYear),
@@ -26,6 +28,7 @@ class FinanceMetricsService
             'availableYears' => $this->getAvailableYears(),
             'selectedYear' => $selectedYear,
             'topDebtors' => $this->getTopDebtors($selectedYear),
+            'debtAging' => $debtAging,
         ];
     }
 
@@ -139,5 +142,46 @@ class FinanceMetricsService
             ->distinct()
             ->orderByDesc('year')
             ->pluck('year');
+    }
+
+    private function getDebtAging(?int $selectedYear = null): array
+    {
+        $query = Payment::query()
+            ->where('paid', false);
+
+        if ($selectedYear) {
+            $query->where('year', $selectedYear);
+        }
+
+        $payments = $query->get(['month', 'year', 'amount']);
+
+        $today = Carbon::today();
+
+        $aging = [
+            'current' => 0,
+            '1_30' => 0,
+            '31_60' => 0,
+            '61_90' => 0,
+            '90_plus' => 0,
+        ];
+
+        foreach ($payments as $payment) {
+            $dueDate = Carbon::createFromDate($payment->year, $payment->month, 1)->endOfMonth();
+            $daysOverdue = $dueDate->diffInDays($today, false);
+
+            if ($daysOverdue <= 0) {
+                $aging['current'] += $payment->amount;
+            } elseif ($daysOverdue <= 30) {
+                $aging['1_30'] += $payment->amount;
+            } elseif ($daysOverdue <= 60) {
+                $aging['31_60'] += $payment->amount;
+            } elseif ($daysOverdue <= 90) {
+                $aging['61_90'] += $payment->amount;
+            } else {
+                $aging['90_plus'] += $payment->amount;
+            }
+        }
+
+        return $aging;
     }
 }
