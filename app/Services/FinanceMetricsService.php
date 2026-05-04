@@ -30,6 +30,7 @@ class FinanceMetricsService
             'selectedYear' => $selectedYear,
             'topDebtors' => $this->getTopDebtors($selectedYear),
             'debtAging' => $debtAging,
+            'monthlyComparison' => $monthlyComparison,
         ];
     }
 
