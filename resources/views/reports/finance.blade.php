@@ -76,7 +76,70 @@
             </h2>
         </div>
     </div>
+    {{-- Comparação mensal --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="rounded-xl border border-green-200 bg-green-50 p-4 shadow-sm">
+            <p class="text-sm font-medium text-green-700">
+                Recebido este mês — {{ $monthlyComparison['current_month']['label'] }}
+            </p>
 
+            <p class="mt-2 text-2xl font-semibold text-green-900">
+                € {{ number_format($monthlyComparison['current_month']['paid'], 2, ',', '.') }}
+            </p>
+
+            <p class="mt-2 text-sm text-green-700">
+                Mês anterior — {{ $monthlyComparison['previous_month']['label'] }}:
+                € {{ number_format($monthlyComparison['previous_month']['paid'], 2, ',', '.') }}
+            </p>
+
+            <p class="mt-1 text-sm font-semibold">
+                @if(is_null($monthlyComparison['variation']['paid']))
+                Sem dados comparáveis
+                @elseif($monthlyComparison['variation']['paid'] >= 0)
+                <span class="text-green-700">
+                    +{{ $monthlyComparison['variation']['paid'] }}% vs mês anterior
+                </span>
+                @else
+                <span class="text-red-700">
+                    {{ $monthlyComparison['variation']['paid'] }}% vs mês anterior
+                </span>
+                @endif
+            </p>
+        </div>
+
+        <div class="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
+            <p class="text-sm font-medium text-red-700">
+                Em dívida este mês — {{ $monthlyComparison['current_month']['label'] }}
+            </p>
+
+            <p class="mt-2 text-2xl font-semibold text-red-900">
+                € {{ number_format($monthlyComparison['current_month']['pending'], 2, ',', '.') }}
+            </p>
+
+            <p class="mt-2 text-sm text-red-700">
+                Mês anterior — {{ $monthlyComparison['previous_month']['label'] }}:
+                € {{ number_format($monthlyComparison['previous_month']['pending'], 2, ',', '.') }}
+            </p>
+
+            <p class="mt-1 text-sm font-semibold">
+                @if(is_null($monthlyComparison['variation']['pending']))
+                Sem dados comparáveis
+                @elseif($monthlyComparison['variation']['pending'] > 0)
+                <span class="text-red-700">
+                    +{{ $monthlyComparison['variation']['pending'] }}% vs mês anterior
+                </span>
+                @elseif($monthlyComparison['variation']['pending'] < 0)
+                    <span class="text-green-700">
+                    {{ $monthlyComparison['variation']['pending'] }}% vs mês anterior
+                    </span>
+                    @else
+                    <span class="text-gray-700">
+                        0% vs mês anterior
+                    </span>
+                    @endif
+            </p>
+        </div>
+    </div>
     {{-- Contadores --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">

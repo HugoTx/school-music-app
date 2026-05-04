@@ -12,6 +12,7 @@ class FinanceMetricsService
         $totals = $this->getTotals($selectedYear);
         $chartData = $this->getChartData($selectedYear);
         $debtAging = $this->getDebtAging($selectedYear);
+        $monthlyComparison = $this->getMonthlyComparison();
 
         return [
             'payments' => $this->getPayments($selectedYear),
@@ -29,6 +30,7 @@ class FinanceMetricsService
             'selectedYear' => $selectedYear,
             'topDebtors' => $this->getTopDebtors($selectedYear),
             'debtAging' => $debtAging,
+            'monthlyComparison' => $monthlyComparison,
         ];
     }
 
@@ -183,5 +185,59 @@ class FinanceMetricsService
         }
 
         return $aging;
+    }
+    private function getMonthlyComparison(): array
+    {
+        $currentMonth = Carbon::now();
+        $previousMonth = Carbon::now()->subMonth();
+
+        $currentMonthPaid = Payment::query()
+            ->where('paid', true)
+            ->where('month', $currentMonth->month)
+            ->where('year', $currentMonth->year)
+            ->sum('amount');
+
+        $previousMonthPaid = Payment::query()
+            ->where('paid', true)
+            ->where('month', $previousMonth->month)
+            ->where('year', $previousMonth->year)
+            ->sum('amount');
+
+        $currentMonthPending = Payment::query()
+            ->where('paid', false)
+            ->where('month', $currentMonth->month)
+            ->where('year', $currentMonth->year)
+            ->sum('amount');
+
+        $previousMonthPending = Payment::query()
+            ->where('paid', false)
+            ->where('month', $previousMonth->month)
+            ->where('year', $previousMonth->year)
+            ->sum('amount');
+
+        return [
+            'current_month' => [
+                'label' => $currentMonth->format('m/Y'),
+                'paid' => $currentMonthPaid,
+                'pending' => $currentMonthPending,
+            ],
+            'previous_month' => [
+                'label' => $previousMonth->format('m/Y'),
+                'paid' => $previousMonthPaid,
+                'pending' => $previousMonthPending,
+            ],
+            'variation' => [
+                'paid' => $this->calculatePercentageVariation($currentMonthPaid, $previousMonthPaid),
+                'pending' => $this->calculatePercentageVariation($currentMonthPending, $previousMonthPending),
+            ],
+        ];
+    }
+    private function calculatePercentageVariation(float|int $current, float|int $previous): ?float
+    {
+        if ($previous == 0) {
+            return $current > 0 ? 100 : null;
+        }
+
+        return round((($current - $previous) / $previous) * 100, 1);
     }
 }
