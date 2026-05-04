@@ -53,6 +53,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::delete('/students/{student}/payments/{payment}', [PaymentController::class, 'destroyByStudent'])
         ->name('students.payments.destroy');
+
+    Route::get('/reports/finance/export', [FinanceReportController::class, 'export'])
+        ->name('reports.finance.export');
 });
 
 require __DIR__ . '/auth.php';

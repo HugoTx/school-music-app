@@ -37,6 +37,12 @@
                 </a>
             </div>
             @endif
+            <div>
+                <a href="{{ route('reports.finance.export', ['year' => $selectedYear]) }}"
+                    style="background: #16a34a; color: white; padding: 10px 14px; border-radius: 6px; text-decoration: none; display: inline-block;">
+                    Exportar Excel
+                </a>
+            </div>
         </form>
     </div>
 
@@ -192,8 +198,6 @@
             </table>
         </div>
     </div>
-    ```
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
