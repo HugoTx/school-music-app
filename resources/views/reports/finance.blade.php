@@ -47,212 +47,272 @@
     </div>
 
     {{-- KPIs principais --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div style="background: #ecfdf5; padding: 16px; border-radius: 8px;">
-            <p style="color: #065f46; font-size: 14px;">Total recebido</p>
-            <h2 style="font-size: 24px; font-weight: bold; color: #065f46;">
-                €{{ number_format($totalPaid, 2, ',', '.') }}
-            </h2>
+    <div style="background: #ffffff; border: 1px solid #d1d5db; border-left: 5px solid #16a34a; border-radius: 8px; padding: 18px 22px; margin-bottom: 24px;">
+        <div style="text-align: center; color: #6b7280; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 18px;">
+            Resumo financeiro
         </div>
 
-        <div style="background: #fef2f2; padding: 16px; border-radius: 8px;">
-            <p style="color: #991b1b; font-size: 14px;">Total em dívida</p>
-            <h2 style="font-size: 24px; font-weight: bold; color: #991b1b;">
-                €{{ number_format($totalPending, 2, ',', '.') }}
-            </h2>
-        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; text-align: center;">
+            <div style="padding: 0 16px;">
+                <div style="font-size: 28px; font-weight: 800; color: #047857;">
+                    €{{ number_format($totalPaid, 2, ',', '.') }}
+                </div>
+                <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; margin-top: 4px;">
+                    Recebido
+                </div>
+            </div>
 
-        <div style="background: #eff6ff; padding: 16px; border-radius: 8px;">
-            <p style="color: #1d4ed8; font-size: 14px;">Total geral</p>
-            <h2 style="font-size: 24px; font-weight: bold; color: #1d4ed8;">
-                €{{ number_format($totalAmount, 2, ',', '.') }}
-            </h2>
-        </div>
+            <div style="padding: 0 16px; border-left: 2px solid #e5e7eb;">
+                <div style="font-size: 28px; font-weight: 800; color: #b91c1c;">
+                    €{{ number_format($totalPending, 2, ',', '.') }}
+                </div>
+                <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; margin-top: 4px;">
+                    Em dívida
+                </div>
+            </div>
 
-        <div style="background: #fefce8; padding: 16px; border-radius: 8px;">
-            <p style="color: #854d0e; font-size: 14px;">Taxa de cobrança</p>
-            <h2 style="font-size: 24px; font-weight: bold; color: #854d0e;">
-                {{ $collectionRate }}%
-            </h2>
+            <div style="padding: 0 16px; border-left: 2px solid #e5e7eb;">
+                <div style="font-size: 28px; font-weight: 800; color: #2563eb;">
+                    €{{ number_format($totalAmount, 2, ',', '.') }}
+                </div>
+                <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; margin-top: 4px;">
+                    Total
+                </div>
+            </div>
+
+            <div style="padding: 0 16px; border-left: 2px solid #e5e7eb;">
+                <div style="font-size: 28px; font-weight: 800; color: #92400e;">
+                    {{ $collectionRate }}%
+                </div>
+                <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; margin-top: 4px;">
+                    Cobrança
+                </div>
+            </div>
         </div>
     </div>
     {{-- Comparação mensal --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div class="rounded-xl border border-green-200 bg-green-50 p-4 shadow-sm">
-            <p class="text-sm font-medium text-green-700">
-                Recebido este mês — {{ $monthlyComparison['current_month']['label'] }}
-            </p>
-
-            <p class="mt-2 text-2xl font-semibold text-green-900">
-                € {{ number_format($monthlyComparison['current_month']['paid'], 2, ',', '.') }}
-            </p>
-
-            <p class="mt-2 text-sm text-green-700">
-                Mês anterior — {{ $monthlyComparison['previous_month']['label'] }}:
-                € {{ number_format($monthlyComparison['previous_month']['paid'], 2, ',', '.') }}
-            </p>
-
-            <p class="mt-1 text-sm font-semibold">
-                @if(is_null($monthlyComparison['variation']['paid']))
-                Sem dados comparáveis
-                @elseif($monthlyComparison['variation']['paid'] >= 0)
-                <span class="text-green-700">
-                    +{{ $monthlyComparison['variation']['paid'] }}% vs mês anterior
-                </span>
-                @else
-                <span class="text-red-700">
-                    {{ $monthlyComparison['variation']['paid'] }}% vs mês anterior
-                </span>
-                @endif
-            </p>
+    <div style="background: #ffffff; border: 1px solid #d1d5db; border-left: 5px solid #0ea5e9; border-radius: 8px; padding: 18px 22px; margin-bottom: 24px;">
+        <div style="text-align: center; color: #6b7280; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 18px;">
+            Comparação mensal
         </div>
 
-        <div class="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
-            <p class="text-sm font-medium text-red-700">
-                Em dívida este mês — {{ $monthlyComparison['current_month']['label'] }}
-            </p>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); text-align: center;">
+            <div style="padding: 0 16px;">
+                <div style="font-size: 13px; color: #6b7280; font-weight: 700; text-transform: uppercase;">
+                    Recebido este mês
+                </div>
 
-            <p class="mt-2 text-2xl font-semibold text-red-900">
-                € {{ number_format($monthlyComparison['current_month']['pending'], 2, ',', '.') }}
-            </p>
+                <div style="font-size: 26px; font-weight: 800; color: #047857; margin-top: 6px;">
+                    €{{ number_format($monthlyComparison['current_month']['paid'], 2, ',', '.') }}
+                </div>
 
-            <p class="mt-2 text-sm text-red-700">
-                Mês anterior — {{ $monthlyComparison['previous_month']['label'] }}:
-                € {{ number_format($monthlyComparison['previous_month']['pending'], 2, ',', '.') }}
-            </p>
+                <div style="font-size: 12px; color: #6b7280; margin-top: 6px;">
+                    {{ $monthlyComparison['current_month']['label'] }} vs {{ $monthlyComparison['previous_month']['label'] }}
+                </div>
 
-            <p class="mt-1 text-sm font-semibold">
-                @if(is_null($monthlyComparison['variation']['pending']))
-                Sem dados comparáveis
-                @elseif($monthlyComparison['variation']['pending'] > 0)
-                <span class="text-red-700">
-                    +{{ $monthlyComparison['variation']['pending'] }}% vs mês anterior
-                </span>
-                @elseif($monthlyComparison['variation']['pending'] < 0)
-                    <span class="text-green-700">
-                    {{ $monthlyComparison['variation']['pending'] }}% vs mês anterior
-                    </span>
+                <div style="font-size: 13px; font-weight: 700; margin-top: 8px;">
+                    @if(is_null($monthlyComparison['variation']['paid']))
+                    <span style="color: #6b7280;">Sem dados comparáveis</span>
+                    @elseif($monthlyComparison['variation']['paid'] >= 0)
+                    <span style="color: #047857;">+{{ $monthlyComparison['variation']['paid'] }}% vs mês anterior</span>
                     @else
-                    <span class="text-gray-700">
-                        0% vs mês anterior
-                    </span>
+                    <span style="color: #b91c1c;">{{ $monthlyComparison['variation']['paid'] }}% vs mês anterior</span>
                     @endif
-            </p>
+                </div>
+            </div>
+
+            <div style="padding: 0 16px; border-left: 2px solid #e5e7eb;">
+                <div style="font-size: 13px; color: #6b7280; font-weight: 700; text-transform: uppercase;">
+                    Em dívida este mês
+                </div>
+
+                <div style="font-size: 26px; font-weight: 800; color: #b91c1c; margin-top: 6px;">
+                    €{{ number_format($monthlyComparison['current_month']['pending'], 2, ',', '.') }}
+                </div>
+
+                <div style="font-size: 12px; color: #6b7280; margin-top: 6px;">
+                    {{ $monthlyComparison['current_month']['label'] }} vs {{ $monthlyComparison['previous_month']['label'] }}
+                </div>
+
+                <div style="font-size: 13px; font-weight: 700; margin-top: 8px;">
+                    @if(is_null($monthlyComparison['variation']['pending']))
+                    <span style="color: #6b7280;">Sem dados comparáveis</span>
+                    @elseif($monthlyComparison['variation']['pending'] > 0)
+                    <span style="color: #b91c1c;">+{{ $monthlyComparison['variation']['pending'] }}% vs mês anterior</span>
+                    @elseif($monthlyComparison['variation']['pending'] < 0)
+                        <span style="color: #047857;">{{ $monthlyComparison['variation']['pending'] }}% vs mês anterior</span>
+                        @else
+                        <span style="color: #6b7280;">0% vs mês anterior</span>
+                        @endif
+                </div>
+            </div>
         </div>
     </div>
     {{-- Contadores --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
-            <p style="color: #374151; font-size: 14px;">Nº total de pagamentos</p>
-            <h2 style="font-size: 24px; font-weight: bold; color: #111827;">
-                {{ $paymentsCount }}
-            </h2>
+    <div style="background: #ffffff; border: 1px solid #d1d5db; border-left: 5px solid #3b82f6; border-radius: 8px; padding: 18px 22px; margin-bottom: 24px;">
+        <div style="text-align: center; color: #6b7280; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 18px;">
+            Pagamentos
         </div>
 
-        <div style="background: #ecfdf5; padding: 16px; border-radius: 8px;">
-            <p style="color: #065f46; font-size: 14px;">Pagamentos pagos</p>
-            <h2 style="font-size: 24px; font-weight: bold; color: #065f46;">
-                {{ $paidCount }}
-            </h2>
-        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: center;">
+            <div style="padding: 0 16px;">
+                <div style="font-size: 26px; font-weight: 800; color: #111827;">
+                    {{ $paymentsCount }}
+                </div>
+                <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; margin-top: 4px;">
+                    Total
+                </div>
+            </div>
 
-        <div style="background: #fef2f2; padding: 16px; border-radius: 8px;">
-            <p style="color: #991b1b; font-size: 14px;">Pagamentos por pagar</p>
-            <h2 style="font-size: 24px; font-weight: bold; color: #991b1b;">
-                {{ $pendingCount }}
-            </h2>
+            <div style="padding: 0 16px; border-left: 2px solid #e5e7eb;">
+                <div style="font-size: 26px; font-weight: 800; color: #047857;">
+                    {{ $paidCount }}
+                </div>
+                <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; margin-top: 4px;">
+                    Pagos
+                </div>
+            </div>
+
+            <div style="padding: 0 16px; border-left: 2px solid #e5e7eb;">
+                <div style="font-size: 26px; font-weight: 800; color: #b91c1c;">
+                    {{ $pendingCount }}
+                </div>
+                <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; margin-top: 4px;">
+                    Por pagar
+                </div>
+            </div>
         </div>
     </div>
 
     {{-- Aging da dívida --}}
-    <div class="mb-6">
-        <h2 class="text-xl font-bold mb-4">Antiguidade da dívida</h2>
+    <div style="background: #ffffff; border: 1px solid #d1d5db; border-left: 5px solid #ef4444; border-radius: 8px; padding: 18px 22px; margin-bottom: 24px;">
+        <div style="text-align: center; color: #6b7280; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px;">
+            Antiguidade da dívida
+        </div>
 
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <p class="text-sm text-gray-500">Não vencido</p>
-                <p class="mt-2 text-2xl font-semibold text-gray-900">
-                    € {{ number_format($debtAging['current'], 2, ',', '.') }}
-                </p>
+        <p style="text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 18px;">
+            Distribuição dos valores em dívida por tempo de atraso.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); text-align: center;">
+            <div style="padding: 0 12px;">
+                <div style="font-size: 22px; font-weight: 800; color: #111827;">
+                    €{{ number_format($debtAging['current'], 2, ',', '.') }}
+                </div>
+                <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; margin-top: 4px;">
+                    Não vencido
+                </div>
             </div>
 
-            <div class="rounded-xl border border-yellow-200 bg-yellow-50 p-4 shadow-sm">
-                <p class="text-sm text-yellow-700">1–30 dias</p>
-                <p class="mt-2 text-2xl font-semibold text-yellow-900">
-                    € {{ number_format($debtAging['1_30'], 2, ',', '.') }}
-                </p>
+            <div style="padding: 0 12px; border-left: 2px solid #e5e7eb;">
+                <div style="font-size: 22px; font-weight: 800; color: #ca8a04;">
+                    €{{ number_format($debtAging['1_30'], 2, ',', '.') }}
+                </div>
+                <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; margin-top: 4px;">
+                    1–30 dias
+                </div>
             </div>
 
-            <div class="rounded-xl border border-orange-200 bg-orange-50 p-4 shadow-sm">
-                <p class="text-sm text-orange-700">31–60 dias</p>
-                <p class="mt-2 text-2xl font-semibold text-orange-900">
-                    € {{ number_format($debtAging['31_60'], 2, ',', '.') }}
-                </p>
+            <div style="padding: 0 12px; border-left: 2px solid #e5e7eb;">
+                <div style="font-size: 22px; font-weight: 800; color: #ea580c;">
+                    €{{ number_format($debtAging['31_60'], 2, ',', '.') }}
+                </div>
+                <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; margin-top: 4px;">
+                    31–60 dias
+                </div>
             </div>
 
-            <div class="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
-                <p class="text-sm text-red-700">61–90 dias</p>
-                <p class="mt-2 text-2xl font-semibold text-red-900">
-                    € {{ number_format($debtAging['61_90'], 2, ',', '.') }}
-                </p>
+            <div style="padding: 0 12px; border-left: 2px solid #e5e7eb;">
+                <div style="font-size: 22px; font-weight: 800; color: #dc2626;">
+                    €{{ number_format($debtAging['61_90'], 2, ',', '.') }}
+                </div>
+                <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; margin-top: 4px;">
+                    61–90 dias
+                </div>
             </div>
 
-            <div class="rounded-xl border border-red-300 bg-red-100 p-4 shadow-sm">
-                <p class="text-sm text-red-800">+90 dias</p>
-                <p class="mt-2 text-2xl font-semibold text-red-950">
-                    € {{ number_format($debtAging['90_plus'], 2, ',', '.') }}
-                </p>
+            <div style="padding: 0 12px; border-left: 2px solid #e5e7eb;">
+                <div style="font-size: 22px; font-weight: 800; color: #991b1b;">
+                    €{{ number_format($debtAging['90_plus'], 2, ',', '.') }}
+                </div>
+                <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; margin-top: 4px;">
+                    +90 dias
+                </div>
             </div>
         </div>
     </div>
 
     {{-- Gráfico --}}
-    <div class="bg-white shadow rounded p-4 mb-6">
-        <h2 class="text-xl font-bold mb-4">Pagamentos por mês</h2>
-        <canvas id="paymentsChart" height="100"></canvas>
+    <div style="background: #ffffff; border: 1px solid #d1d5db; border-left: 5px solid #6366f1; border-radius: 8px; padding: 18px 22px; margin-bottom: 24px;">
+        <div style="text-align: center; color: #6b7280; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px;">
+            Pagamentos por mês
+        </div>
+
+        <p style="text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 18px;">
+            Valores recebidos vs valores em dívida ao longo dos meses.
+        </p>
+
+        <div style="height: 280px; position: relative;">
+            <canvas id="paymentsChart"></canvas>
+        </div>
     </div>
 
     {{-- Tabela --}}
-    <div class="bg-white shadow rounded p-4">
-        <h2 class="text-xl font-bold mb-4">Lista de pagamentos</h2>
+    <div style="background: #ffffff; border: 1px solid #d1d5db; border-left: 5px solid #64748b; border-radius: 8px; padding: 18px 22px; margin-bottom: 24px;">
+        <div style="text-align: center; color: #6b7280; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px;">
+            Lista de pagamentos
+        </div>
+
+        <p style="text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 18px;">
+            Detalhe dos pagamentos registados no sistema.
+        </p>
 
         <div style="overflow-x: auto;">
-            <table class="w-full">
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                 <thead>
-                    <tr style="background: #f3f4f6;">
-                        <th class="p-2 text-left">Aluno</th>
-                        <th class="p-2 text-left">Aula</th>
-                        <th class="p-2 text-left">Mês/Ano</th>
-                        <th class="p-2 text-left">Valor</th>
-                        <th class="p-2 text-left">Estado</th>
+                    <tr style="background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                        <th style="padding: 12px 10px; text-align: left; color: #6b7280; font-size: 12px; text-transform: uppercase;">Aluno</th>
+                        <th style="padding: 12px 10px; text-align: left; color: #6b7280; font-size: 12px; text-transform: uppercase;">Aula</th>
+                        <th style="padding: 12px 10px; text-align: left; color: #6b7280; font-size: 12px; text-transform: uppercase;">Mês/Ano</th>
+                        <th style="padding: 12px 10px; text-align: right; color: #6b7280; font-size: 12px; text-transform: uppercase;">Valor</th>
+                        <th style="padding: 12px 10px; text-align: center; color: #6b7280; font-size: 12px; text-transform: uppercase;">Estado</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @forelse($payments as $payment)
-                    <tr class="border-b">
-                        <td class="p-2">
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="padding: 12px 10px; font-weight: 600; color: #111827;">
                             {{ $payment->enrollment->student->name ?? '—' }}
                         </td>
-                        <td class="p-2">
+
+                        <td style="padding: 12px 10px; color: #4b5563;">
                             {{ $payment->enrollment->lesson->name ?? '—' }}
                         </td>
-                        <td class="p-2">
+
+                        <td style="padding: 12px 10px; color: #4b5563;">
                             {{ $payment->month }}/{{ $payment->year }}
                         </td>
-                        <td class="p-2">
+
+                        <td style="padding: 12px 10px; text-align: right; font-weight: 700; color: #111827;">
                             €{{ number_format($payment->amount, 2, ',', '.') }}
                         </td>
-                        <td class="p-2">
+
+                        <td style="padding: 12px 10px; text-align: center;">
                             @if($payment->paid)
-                            <span style="color: #166534; font-weight: bold;">Pago</span>
+                            <span style="display: inline-block; background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;">
+                                Pago
+                            </span>
                             @else
-                            <span style="color: #991b1b; font-weight: bold;">Por pagar</span>
+                            <span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;">
+                                Por pagar
+                            </span>
                             @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="p-4 text-center text-gray-500">
+                        <td colspan="5" style="padding: 28px 10px; text-align: center; color: #6b7280;">
                             Ainda não existem pagamentos registados.
                         </td>
                     </tr>
@@ -286,9 +346,10 @@
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'top'
+                    position: 'bottom'
                 }
             },
             scales: {
