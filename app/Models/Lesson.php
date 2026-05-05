@@ -13,6 +13,9 @@ class Lesson extends Model
         'teacher_id',
         'description',
         'price',
+        'weekday',
+        'start_time',
+        'end_time',
     ];
 
     public function teacher()

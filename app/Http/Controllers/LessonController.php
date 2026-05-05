@@ -27,9 +27,20 @@ class LessonController extends Controller
             'type' => 'required',
             'teacher_id' => 'required',
             'price' => 'required|numeric',
+            'weekday' => 'nullable|string',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i|after:start_time',
         ]);
 
-        Lesson::create($request->all());
+        Lesson::create($request->only([
+            'name',
+            'type',
+            'teacher_id',
+            'price',
+            'weekday',
+            'start_time',
+            'end_time',
+        ]));
 
         return redirect()->route('lessons.index');
     }
