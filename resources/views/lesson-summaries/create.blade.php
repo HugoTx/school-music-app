@@ -68,6 +68,30 @@
                     rows="6"
                     class="border rounded px-3 py-2 w-full"
                     placeholder="Ex: Escalas maiores, leitura rítmica e preparação do repertório...">{{ old('content') }}</textarea>
+                <div id="attendances-wrapper" style="margin-top: 24px; display: none;">
+                    <h2 class="text-xl font-bold" style="margin-bottom: 12px;">
+                        Presenças
+                    </h2>
+
+                    <p style="color: #6b7280; margin-bottom: 12px;">
+                        Selecione o estado de presença dos alunos inscritos nesta aula.
+                    </p>
+
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f9fafb;">
+                                    <th style="padding: 12px; text-align: left;">Aluno</th>
+                                    <th style="padding: 12px; text-align: left;">Estado</th>
+                                    <th style="padding: 12px; text-align: left;">Notas</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="attendances-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -95,4 +119,78 @@
         </div>
     </form>
 </div>
+<script>
+    const lessonSelect = document.getElementById('lesson_id');
+    const attendancesWrapper = document.getElementById('attendances-wrapper');
+    const attendancesTableBody = document.getElementById('attendances-table-body');
+
+    lessonSelect.addEventListener('change', function() {
+        const lessonId = this.value;
+
+        attendancesTableBody.innerHTML = '';
+        attendancesWrapper.style.display = 'none';
+
+        if (!lessonId) {
+            return;
+        }
+
+        fetch(`{{ url('/lessons') }}/${lessonId}/students`)
+            .then(response => response.json())
+            .then(students => {
+                if (!students.length) {
+                    attendancesTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="3" style="padding: 18px; text-align: center; color: #6b7280;">
+                                Esta aula ainda não tem alunos inscritos.
+                            </td>
+                        </tr>
+                    `;
+                    attendancesWrapper.style.display = 'block';
+                    return;
+                }
+
+                students.forEach(student => {
+                    const row = document.createElement('tr');
+                    row.style.borderTop = '1px solid #e5e7eb';
+
+                    row.innerHTML = `
+                        <td style="padding: 12px;">
+                            ${student.name}
+                        </td>
+
+                        <td style="padding: 12px;">
+                            <select name="attendances[${student.id}][status]" class="border rounded px-3 py-2">
+                                <option value="present" selected>Presente</option>
+                                <option value="absent">Faltou</option>
+                                <option value="justified">Justificada</option>
+                            </select>
+                        </td>
+
+                        <td style="padding: 12px;">
+                            <input
+                                type="text"
+                                name="attendances[${student.id}][notes]"
+                                class="border rounded px-3 py-2 w-full"
+                                placeholder="Observações..."
+                            >
+                        </td>
+                    `;
+
+                    attendancesTableBody.appendChild(row);
+                });
+
+                attendancesWrapper.style.display = 'block';
+            })
+            .catch(() => {
+                attendancesTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="padding: 18px; text-align: center; color: #991b1b;">
+                            Não foi possível carregar os alunos desta aula.
+                        </td>
+                    </tr>
+                `;
+                attendancesWrapper.style.display = 'block';
+            });
+    });
+</script>
 @endsection

@@ -15,6 +15,17 @@
             Consulte o conteúdo do sumário e as presenças registadas.
         </p>
     </div>
+    @if(session('success'))
+    <div style="background: #ecfdf5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+        {{ session('success') }}
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div style="background: #fef2f2; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+        {{ session('error') }}
+    </div>
+    @endif
 
     <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 18px; margin-bottom: 20px;">
         <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">

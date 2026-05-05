@@ -59,6 +59,9 @@ Route::middleware(['auth'])->group(function () {
         ->name('reports.finance.export');
 
     Route::resource('lesson-summaries', LessonSummaryController::class);
+
+    Route::get('/lessons/{lesson}/students', [LessonSummaryController::class, 'studentsByLesson'])
+        ->name('lessons.students');
 });
 
 require __DIR__ . '/auth.php';

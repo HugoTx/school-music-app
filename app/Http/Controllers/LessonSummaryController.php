@@ -65,6 +65,9 @@ class LessonSummaryController extends Controller
             'summary_date' => 'required|date',
             'content' => 'nullable|string',
             'action' => 'required|in:draft,confirm',
+            'attendances' => 'nullable|array',
+            'attendances.*.status' => 'required|in:present,absent,justified',
+            'attendances.*.notes' => 'nullable|string',
         ]);
 
         $lesson = Lesson::with('teacher')->findOrFail($validated['lesson_id']);
@@ -94,10 +97,14 @@ class LessonSummaryController extends Controller
         $lesson->load('enrollments.student');
 
         foreach ($lesson->enrollments as $enrollment) {
+            $studentId = $enrollment->student_id;
+            $attendanceData = $validated['attendances'][$studentId] ?? null;
+
             LessonSummaryAttendance::create([
                 'lesson_summary_id' => $summary->id,
-                'student_id' => $enrollment->student_id,
-                'status' => 'present',
+                'student_id' => $studentId,
+                'status' => $attendanceData['status'] ?? 'present',
+                'notes' => $attendanceData['notes'] ?? null,
             ]);
         }
         return redirect()
@@ -122,17 +129,90 @@ class LessonSummaryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(LessonSummary $lessonSummary)
     {
-        //
+        if ($lessonSummary->isConfirmed()) {
+            return redirect()
+                ->route('lesson-summaries.show', $lessonSummary)
+                ->with('error', 'Não é possível editar um sumário confirmado.');
+        }
+
+        $lessonSummary->load([
+            'lesson',
+            'teacher',
+            'attendances.student',
+        ]);
+
+        return view('lesson-summaries.edit', compact('lessonSummary'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, LessonSummary $lessonSummary)
     {
-        //
+        if ($lessonSummary->isConfirmed()) {
+            return redirect()
+                ->route('lesson-summaries.show', $lessonSummary)
+                ->with('error', 'Sumários confirmados não podem ser editados.');
+        }
+
+        $validated = $request->validate([
+            'summary_date' => 'required|date',
+            'content' => 'nullable|string',
+            'action' => 'required|in:save,confirm',
+            'attendances' => 'nullable|array',
+            'attendances.*.status' => 'required|in:present,absent,justified',
+            'attendances.*.notes' => 'nullable|string',
+        ]);
+
+        $exists = LessonSummary::where('lesson_id', $lessonSummary->lesson_id)
+            ->whereDate('summary_date', $validated['summary_date'])
+            ->where('id', '!=', $lessonSummary->id)
+            ->exists();
+
+        if ($exists) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'duplicate' => 'Já existe um sumário para esta aula nesta data.',
+                ]);
+        }
+
+        $lessonSummary->update([
+            'summary_date' => $validated['summary_date'],
+            'content' => $validated['content'] ?? null,
+            'status' => $validated['action'] === 'confirm' ? 'confirmed' : 'draft',
+            'confirmed_at' => $validated['action'] === 'confirm' ? now() : null,
+        ]);
+
+        foreach ($validated['attendances'] ?? [] as $attendanceId => $attendanceData) {
+            $lessonSummary->attendances()
+                ->where('id', $attendanceId)
+                ->update([
+                    'status' => $attendanceData['status'],
+                    'notes' => $attendanceData['notes'] ?? null,
+                ]);
+        }
+
+        return redirect()
+            ->route('lesson-summaries.show', $lessonSummary)
+            ->with('success', 'Sumário atualizado com sucesso.');
+    }
+
+    public function studentsByLesson(Lesson $lesson)
+    {
+        $lesson->load('enrollments.student');
+
+        return response()->json(
+            $lesson->enrollments
+                ->map(fn($enrollment) => [
+                    'id' => $enrollment->student->id,
+                    'name' => $enrollment->student->name,
+                ])
+                ->values()
+        );
     }
 
     /**
