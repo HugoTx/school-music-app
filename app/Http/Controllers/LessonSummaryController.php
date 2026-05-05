@@ -46,13 +46,20 @@ class LessonSummaryController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
         $lessons = Lesson::with('teacher')
             ->orderBy('name')
             ->get();
 
-        return view('lesson-summaries.create', compact('lessons'));
+        $selectedLessonId = $request->integer('lesson_id');
+        $selectedDate = $request->input('summary_date', now()->format('Y-m-d'));
+
+        return view('lesson-summaries.create', compact(
+            'lessons',
+            'selectedLessonId',
+            'selectedDate'
+        ));
     }
 
     /**

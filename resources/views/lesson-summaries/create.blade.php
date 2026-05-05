@@ -23,7 +23,10 @@
         @csrf
 
         <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 18px; margin-bottom: 20px;">
+
+            {{-- Aula + Data --}}
             <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;">
+
                 <div>
                     <label for="lesson_id" style="display: block; margin-bottom: 6px; font-weight: bold;">
                         Aula
@@ -32,7 +35,9 @@
                     <select name="lesson_id" id="lesson_id" class="border rounded px-3 py-2 w-full" required>
                         <option value="">Selecionar aula</option>
                         @foreach($lessons as $lesson)
-                        <option value="{{ $lesson->id }}" {{ old('lesson_id') == $lesson->id ? 'selected' : '' }}>
+                        <option value="{{ $lesson->id }}"
+                            {{ (string) old('lesson_id', $selectedLessonId ?? '') === (string) $lesson->id ? 'selected' : '' }}>
+
                             {{ $lesson->name }}
                             @if($lesson->teacher)
                             — {{ $lesson->teacher->name }}
@@ -51,12 +56,13 @@
                         type="date"
                         name="summary_date"
                         id="summary_date"
-                        value="{{ old('summary_date', now()->format('Y-m-d')) }}"
+                        value="{{ old('summary_date', $selectedDate ?? now()->format('Y-m-d')) }}"
                         class="border rounded px-3 py-2 w-full"
                         required>
                 </div>
             </div>
 
+            {{-- Sumário --}}
             <div style="margin-top: 16px;">
                 <label for="content" style="display: block; margin-bottom: 6px; font-weight: bold;">
                     Sumário
@@ -68,33 +74,36 @@
                     rows="6"
                     class="border rounded px-3 py-2 w-full"
                     placeholder="Ex: Escalas maiores, leitura rítmica e preparação do repertório...">{{ old('content') }}</textarea>
-                <div id="attendances-wrapper" style="margin-top: 24px; display: none;">
-                    <h2 class="text-xl font-bold" style="margin-bottom: 12px;">
-                        Presenças
-                    </h2>
+            </div>
 
-                    <p style="color: #6b7280; margin-bottom: 12px;">
-                        Selecione o estado de presença dos alunos inscritos nesta aula.
-                    </p>
+            {{-- Presenças --}}
+            <div id="attendances-wrapper" style="margin-top: 24px; display: none;">
+                <h2 class="text-xl font-bold" style="margin-bottom: 12px;">
+                    Presenças
+                </h2>
 
-                    <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #f9fafb;">
-                                    <th style="padding: 12px; text-align: left;">Aluno</th>
-                                    <th style="padding: 12px; text-align: left;">Estado</th>
-                                    <th style="padding: 12px; text-align: left;">Notas</th>
-                                </tr>
-                            </thead>
+                <p style="color: #6b7280; margin-bottom: 12px;">
+                    Selecione o estado de presença dos alunos inscritos nesta aula.
+                </p>
 
-                            <tbody id="attendances-table-body">
-                            </tbody>
-                        </table>
-                    </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f9fafb;">
+                                <th style="padding: 12px; text-align: left;">Aluno</th>
+                                <th style="padding: 12px; text-align: left;">Estado</th>
+                                <th style="padding: 12px; text-align: left;">Notas</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="attendances-table-body"></tbody>
+                    </table>
                 </div>
             </div>
+
         </div>
 
+        {{-- Botões --}}
         <div style="display: flex; gap: 12px; align-items: center;">
             <button
                 type="submit"
@@ -119,24 +128,22 @@
         </div>
     </form>
 </div>
+
 <script>
     const lessonSelect = document.getElementById('lesson_id');
     const attendancesWrapper = document.getElementById('attendances-wrapper');
     const attendancesTableBody = document.getElementById('attendances-table-body');
 
-    lessonSelect.addEventListener('change', function() {
-        const lessonId = this.value;
-
+    function loadStudents(lessonId) {
         attendancesTableBody.innerHTML = '';
         attendancesWrapper.style.display = 'none';
 
-        if (!lessonId) {
-            return;
-        }
+        if (!lessonId) return;
 
         fetch(`{{ url('/lessons') }}/${lessonId}/students`)
             .then(response => response.json())
             .then(students => {
+
                 if (!students.length) {
                     attendancesTableBody.innerHTML = `
                         <tr>
@@ -154,9 +161,7 @@
                     row.style.borderTop = '1px solid #e5e7eb';
 
                     row.innerHTML = `
-                        <td style="padding: 12px;">
-                            ${student.name}
-                        </td>
+                        <td style="padding: 12px;">${student.name}</td>
 
                         <td style="padding: 12px;">
                             <select name="attendances[${student.id}][status]" class="border rounded px-3 py-2">
@@ -180,17 +185,19 @@
                 });
 
                 attendancesWrapper.style.display = 'block';
-            })
-            .catch(() => {
-                attendancesTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="3" style="padding: 18px; text-align: center; color: #991b1b;">
-                            Não foi possível carregar os alunos desta aula.
-                        </td>
-                    </tr>
-                `;
-                attendancesWrapper.style.display = 'block';
             });
+    }
+
+    lessonSelect.addEventListener('change', function() {
+        loadStudents(this.value);
+    });
+
+    // importante: carregar automaticamente se vier da agenda
+    document.addEventListener('DOMContentLoaded', function() {
+        if (lessonSelect.value) {
+            loadStudents(lessonSelect.value);
+        }
     });
 </script>
+
 @endsection
