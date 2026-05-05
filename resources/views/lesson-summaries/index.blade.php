@@ -16,6 +16,12 @@
         </a>
     </div>
 
+    @if(session('success'))
+    <div style="background: #ecfdf5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+        {{ session('success') }}
+    </div>
+    @endif
+
     <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
         <form method="GET" action="{{ route('lesson-summaries.index') }}" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: end;">
             <div>
