@@ -3,6 +3,7 @@
 @section('content')
 <div class="space-y-6">
 
+    <!-- Header -->
     <div class="flex justify-between items-start flex-wrap gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Agenda de hoje</h1>
@@ -28,6 +29,7 @@
         @foreach($lessons as $lesson)
         @php
         $summary = $summaries->get($lesson->id);
+        $isNextLesson = $lesson->id === $nextLessonId;
 
         if (!$summary) {
         $status = 'Sem sumário';
@@ -56,12 +58,20 @@
         }
         @endphp
 
-        <div class="bg-white border-l-4 {{ $borderClass }} rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+        <div class="bg-white border-l-4 {{ $isNextLesson ? 'border-blue-600 ring-2 ring-blue-100' : $borderClass }} rounded-xl p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
 
-            <div class="flex justify-between items-start flex-wrap gap-4">
+            <div class="flex items-center justify-between gap-6">
 
+                <!-- Info -->
                 <div class="space-y-2">
                     <div class="flex items-center gap-2 text-sm flex-wrap">
+
+                        @if($isNextLesson)
+                        <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                            A seguir
+                        </span>
+                        @endif
+
                         <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $badgeClass }}">
                             {{ $status }}
                         </span>
@@ -90,9 +100,10 @@
                     @endif
                 </div>
 
-                <div>
+                <!-- Action -->
+                <div class="shrink-0">
                     <a href="{{ $route }}"
-                        class="inline-flex items-center justify-center text-white px-4 py-2 rounded-lg {{ $btnClass }} text-sm font-medium shadow-sm hover:shadow transition">
+                        class="inline-flex items-center justify-center text-white px-4 py-2 rounded-lg {{ $btnClass }} text-sm font-medium shadow-sm hover:shadow transition whitespace-nowrap">
                         {{ $btnText }}
                     </a>
                 </div>

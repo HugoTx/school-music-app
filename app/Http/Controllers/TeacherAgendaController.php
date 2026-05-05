@@ -11,6 +11,7 @@ class TeacherAgendaController extends Controller
     public function index()
     {
         $today = Carbon::today();
+        $now = Carbon::now();
 
         $weekday = strtolower($today->format('l'));
 
@@ -24,10 +25,24 @@ class TeacherAgendaController extends Controller
             ->get()
             ->keyBy('lesson_id');
 
+        $nextLessonId = $lessons
+            ->filter(function ($lesson) use ($now) {
+                if (!$lesson->start_time) {
+                    return false;
+                }
+
+                $lessonStart = Carbon::parse($lesson->start_time);
+
+                return $lessonStart->greaterThanOrEqualTo($now);
+            })
+            ->first()
+            ?->id;
+
         return view('teacher-agenda.index', compact(
             'today',
             'lessons',
-            'summaries'
+            'summaries',
+            'nextLessonId'
         ));
     }
 }
