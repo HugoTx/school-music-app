@@ -25,24 +25,43 @@ class TeacherAgendaController extends Controller
             ->get()
             ->keyBy('lesson_id');
 
-        $nextLessonId = $lessons
-            ->filter(function ($lesson) use ($now) {
-                if (!$lesson->start_time) {
-                    return false;
+        $lessonTimeStates = [];
+        $nextLessonId = null;
+
+        foreach ($lessons as $lesson) {
+            if (!$lesson->start_time) {
+                $lessonTimeStates[$lesson->id] = 'Sem hora';
+                continue;
+            }
+
+            $start = Carbon::parse($today->format('Y-m-d') . ' ' . $lesson->start_time);
+            $end = $lesson->end_time
+                ? Carbon::parse($today->format('Y-m-d') . ' ' . $lesson->end_time)
+                : $start->copy()->addHour();
+
+            if ($now->between($start, $end)) {
+                $lessonTimeStates[$lesson->id] = 'A decorrer';
+            } elseif ($now->greaterThan($end)) {
+                $lessonTimeStates[$lesson->id] = 'Terminada';
+            } else {
+                $lessonTimeStates[$lesson->id] = 'Mais tarde';
+
+                if (!$nextLessonId) {
+                    $nextLessonId = $lesson->id;
                 }
+            }
+        }
 
-                $lessonStart = Carbon::parse($lesson->start_time);
-
-                return $lessonStart->greaterThanOrEqualTo($now);
-            })
-            ->first()
-            ?->id;
+        if ($nextLessonId) {
+            $lessonTimeStates[$nextLessonId] = 'A seguir';
+        }
 
         return view('teacher-agenda.index', compact(
             'today',
             'lessons',
             'summaries',
-            'nextLessonId'
+            'nextLessonId',
+            'lessonTimeStates'
         ));
     }
 }

@@ -29,7 +29,7 @@
         @foreach($lessons as $lesson)
         @php
         $summary = $summaries->get($lesson->id);
-        $isNextLesson = $lesson->id === $nextLessonId;
+        $timeState = $lessonTimeStates[$lesson->id] ?? null;
 
         if (!$summary) {
         $status = 'Sem sumário';
@@ -58,17 +58,20 @@
         }
         @endphp
 
-        <div class="bg-white border-l-4 {{ $isNextLesson ? 'border-blue-600 ring-2 ring-blue-100' : $borderClass }} rounded-xl p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-
+        <div
+            @if(in_array($timeState, ['A decorrer', 'A seguir' ]))
+            id="active-lesson"
+            @endif
+            class="bg-white border-l-4 {{ $borderClass }} rounded-xl p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             <div class="flex items-center justify-between gap-6">
 
                 <!-- Info -->
                 <div class="space-y-2">
                     <div class="flex items-center gap-2 text-sm flex-wrap">
 
-                        @if($isNextLesson)
+                        @if($timeState)
                         <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                            A seguir
+                            {{ $timeState }}
                         </span>
                         @endif
 
@@ -116,4 +119,16 @@
     @endif
 
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const activeLesson = document.getElementById('active-lesson');
+
+        if (activeLesson) {
+            activeLesson.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+    });
+</script>
 @endsection
