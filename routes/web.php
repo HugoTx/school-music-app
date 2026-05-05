@@ -8,6 +8,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FinanceReportController;
+use App\Http\Controllers\LessonSummaryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -56,6 +57,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/reports/finance/export', [FinanceReportController::class, 'export'])
         ->name('reports.finance.export');
+
+    Route::resource('lesson-summaries', LessonSummaryController::class);
 });
 
 require __DIR__ . '/auth.php';
