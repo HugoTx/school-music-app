@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LessonSummary;
+use App\Models\Lesson;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 
 class LessonSummaryController extends Controller
@@ -9,9 +12,33 @@ class LessonSummaryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = LessonSummary::with(['lesson', 'teacher'])
+            ->orderByDesc('summary_date');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('lesson_id')) {
+            $query->where('lesson_id', $request->lesson_id);
+        }
+
+        if ($request->filled('teacher_id')) {
+            $query->where('teacher_id', $request->teacher_id);
+        }
+
+        $lessonSummaries = $query->get();
+
+        $lessons = Lesson::orderBy('name')->get();
+        $teachers = Teacher::orderBy('name')->get();
+
+        return view('lesson-summaries.index', compact(
+            'lessonSummaries',
+            'lessons',
+            'teachers'
+        ));
     }
 
     /**
