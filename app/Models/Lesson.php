@@ -13,6 +13,9 @@ class Lesson extends Model
         'teacher_id',
         'description',
         'price',
+        'weekday',
+        'start_time',
+        'end_time',
     ];
 
     public function teacher()
@@ -23,5 +26,10 @@ class Lesson extends Model
     public function enrollments()
     {
         return $this->hasMany(Enrollment::class);
+    }
+
+    public function summaries()
+    {
+        return $this->hasMany(LessonSummary::class);
     }
 }

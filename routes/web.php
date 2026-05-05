@@ -8,6 +8,8 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FinanceReportController;
+use App\Http\Controllers\LessonSummaryController;
+use App\Http\Controllers\TeacherAgendaController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,6 +26,9 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/lessons/{lesson}/students', [LessonSummaryController::class, 'studentsByLesson'])
+        ->name('lessons.students');
+
     Route::resource('students', StudentController::class);
     Route::resource('teachers', TeacherController::class);
     Route::resource('lessons', LessonController::class);
@@ -56,6 +61,13 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/reports/finance/export', [FinanceReportController::class, 'export'])
         ->name('reports.finance.export');
+
+    Route::resource('lesson-summaries', LessonSummaryController::class);
+
+
+
+    Route::get('/agenda', [TeacherAgendaController::class, 'index'])
+        ->name('teacher-agenda.index');
 });
 
 require __DIR__ . '/auth.php';
