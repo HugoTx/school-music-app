@@ -13,7 +13,22 @@ return new class extends Migration
     {
         Schema::create('lesson_summary_attendances', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('lesson_summary_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->foreignId('student_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->string('status')->default('present');
+
+            $table->text('notes')->nullable();
+
             $table->timestamps();
+
+            $table->unique(['lesson_summary_id', 'student_id']);
         });
     }
 
