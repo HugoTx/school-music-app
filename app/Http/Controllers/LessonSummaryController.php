@@ -7,6 +7,7 @@ use App\Models\Lesson;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use App\Models\LessonSummaryAttendance;
 
 class LessonSummaryController extends Controller
 {
@@ -81,7 +82,7 @@ class LessonSummaryController extends Controller
                 ]);
         }
 
-        LessonSummary::create([
+        $summary = LessonSummary::create([
             'lesson_id' => $lesson->id,
             'teacher_id' => $lesson->teacher_id,
             'summary_date' => $validated['summary_date'],
@@ -90,6 +91,15 @@ class LessonSummaryController extends Controller
             'confirmed_at' => $validated['action'] === 'confirm' ? now() : null,
         ]);
 
+        $lesson->load('enrollments.student');
+
+        foreach ($lesson->enrollments as $enrollment) {
+            LessonSummaryAttendance::create([
+                'lesson_summary_id' => $summary->id,
+                'student_id' => $enrollment->student_id,
+                'status' => 'present',
+            ]);
+        }
         return redirect()
             ->route('lesson-summaries.index')
             ->with('success', 'Sumário criado com sucesso.');
