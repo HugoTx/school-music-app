@@ -46,7 +46,11 @@ class LessonSummaryController extends Controller
      */
     public function create()
     {
-        //
+        $lessons = Lesson::with('teacher')
+            ->orderBy('name')
+            ->get();
+
+        return view('lesson-summaries.create', compact('lessons'));
     }
 
     /**
