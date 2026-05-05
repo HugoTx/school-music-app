@@ -16,7 +16,8 @@ class LessonController extends Controller
 
     public function create()
     {
-        $teachers = Teacher::all();
+        $teachers = Teacher::orderBy('name')->get();
+
         return view('lessons.create', compact('teachers'));
     }
 
@@ -27,7 +28,7 @@ class LessonController extends Controller
             'type' => 'required',
             'teacher_id' => 'required',
             'price' => 'required|numeric',
-            'weekday' => 'nullable|string',
+            'weekday' => 'required|string',
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i|after:start_time',
         ]);
