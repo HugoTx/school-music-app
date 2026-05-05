@@ -26,4 +26,9 @@ class Student extends Model
             Enrollment::class
         );
     }
+
+    public function lessonSummaryAttendances()
+    {
+        return $this->hasMany(LessonSummaryAttendance::class);
+    }
 }
