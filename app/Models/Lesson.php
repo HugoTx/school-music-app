@@ -24,4 +24,9 @@ class Lesson extends Model
     {
         return $this->hasMany(Enrollment::class);
     }
+
+    public function summaries()
+    {
+        return $this->hasMany(LessonSummary::class);
+    }
 }
