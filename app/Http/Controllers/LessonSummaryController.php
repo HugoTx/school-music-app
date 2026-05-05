@@ -108,9 +108,15 @@ class LessonSummaryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(LessonSummary $lessonSummary)
     {
-        //
+        $lessonSummary->load([
+            'lesson',
+            'teacher',
+            'attendances.student',
+        ]);
+
+        return view('lesson-summaries.show', compact('lessonSummary'));
     }
 
     /**
